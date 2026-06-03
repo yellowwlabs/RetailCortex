@@ -1,21 +1,37 @@
 'use client';
 
+import Link from 'next/link';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+
+type StoreSummary = {
+  total_products: number;
+  in_stock: number;
+  out_of_stock: number;
+  categories: number;
+  low_stock: number;
+};
 
 export default function DashboardPage() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const [apiStatus, setApiStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+  const [summary, setSummary] = useState<StoreSummary | null>(null);
 
   useEffect(() => {
     async function checkBackend() {
       try {
         const token = await getToken();
         if (!token) return;
-        const res = await apiFetch('/api/v1/users/me', token);
-        setApiStatus(res.ok ? 'ok' : 'error');
+        const [meRes, summaryRes] = await Promise.all([
+          apiFetch('/api/v1/users/me', token),
+          apiFetch('/api/v1/products/summary', token),
+        ]);
+        setApiStatus(meRes.ok && summaryRes.ok ? 'ok' : 'error');
+        if (summaryRes.ok) {
+          setSummary(await summaryRes.json());
+        }
       } catch {
         setApiStatus('error');
       }
@@ -24,10 +40,10 @@ export default function DashboardPage() {
   }, [getToken]);
 
   const stats = [
-    { label: 'Active stores', value: '—' },
-    { label: 'Products tracked', value: '—' },
-    { label: 'Zones monitored', value: '—' },
-    { label: 'Avg. congestion', value: '—' },
+    { label: 'Products tracked', value: summary?.total_products ?? '—' },
+    { label: 'In stock', value: summary?.in_stock ?? '—' },
+    { label: 'Out of stock', value: summary?.out_of_stock ?? '—' },
+    { label: 'Categories', value: summary?.categories ?? '—' },
   ];
 
   return (
@@ -74,10 +90,16 @@ export default function DashboardPage() {
         <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
           <span className="text-indigo-400 text-xl">◈</span>
         </div>
-        <p className="text-zinc-300 font-medium mb-1">No data yet</p>
-        <p className="text-zinc-600 text-sm max-w-sm">
-          Connect your first store to start seeing real-time analytics and congestion data.
+        <p className="text-zinc-300 font-medium mb-1">CSV onboarding ready</p>
+        <p className="text-zinc-600 text-sm max-w-sm mb-4">
+          Upload a CSV catalog to import products, create inventory records, and populate the search index.
         </p>
+        <Link
+          href="/dashboard/store"
+          className="inline-flex items-center rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 transition-colors"
+        >
+          Open store upload
+        </Link>
       </div>
     </div>
   );
