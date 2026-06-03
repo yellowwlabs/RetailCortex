@@ -102,4 +102,4 @@ RetailCortex/
 
 ## 📄 License
 
-This project is private and intended for internal use at Yellow Labs.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
