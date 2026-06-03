@@ -1,0 +1,208 @@
+import { useSignUp } from '@clerk/expo';
+import { Link, useRouter } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+
+export default function SignUpScreen() {
+  const { signUp, setActive, isLoaded } = useSignUp();
+  const router = useRouter();
+  const theme = useTheme();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleSignUp() {
+    if (!isLoaded) return;
+    setLoading(true);
+    setError('');
+    try {
+      await signUp.create({ emailAddress: email, password });
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      setPendingVerification(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Sign up failed';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerify() {
+    if (!isLoaded) return;
+    setLoading(true);
+    setError('');
+    try {
+      const result = await signUp.attemptEmailAddressVerification({ code });
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        router.replace('/');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Verification failed';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (pendingVerification) {
+    return (
+      <ThemedView style={styles.root}>
+        <SafeAreaView style={styles.safeArea}>
+          <ThemedView style={styles.card}>
+            <ThemedText type="title" style={styles.heading}>
+              Verify email
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Enter the code sent to {email}
+            </ThemedText>
+
+            <TextInput
+              style={[styles.input, { color: theme.text, borderColor: theme.backgroundElement }]}
+              placeholder="Verification code"
+              placeholderTextColor={theme.textSecondary}
+              keyboardType="number-pad"
+              value={code}
+              onChangeText={setCode}
+            />
+
+            {error ? (
+              <ThemedText type="small" style={styles.error}>
+                {error}
+              </ThemedText>
+            ) : null}
+
+            <Pressable
+              style={[styles.button, { backgroundColor: theme.text }]}
+              onPress={handleVerify}
+              disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color={theme.background} />
+              ) : (
+                <ThemedText style={[styles.buttonText, { color: theme.background }]}>
+                  Verify
+                </ThemedText>
+              )}
+            </Pressable>
+          </ThemedView>
+        </SafeAreaView>
+      </ThemedView>
+    );
+  }
+
+  return (
+    <ThemedView style={styles.root}>
+      <SafeAreaView style={styles.safeArea}>
+        <ThemedView style={styles.card}>
+          <ThemedText type="title" style={styles.heading}>
+            Create account
+          </ThemedText>
+
+          <TextInput
+            style={[styles.input, { color: theme.text, borderColor: theme.backgroundElement }]}
+            placeholder="Email"
+            placeholderTextColor={theme.textSecondary}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
+
+          <TextInput
+            style={[styles.input, { color: theme.text, borderColor: theme.backgroundElement }]}
+            placeholder="Password"
+            placeholderTextColor={theme.textSecondary}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          {error ? (
+            <ThemedText type="small" style={styles.error}>
+              {error}
+            </ThemedText>
+          ) : null}
+
+          <Pressable
+            style={[styles.button, { backgroundColor: theme.text }]}
+            onPress={handleSignUp}
+            disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color={theme.background} />
+            ) : (
+              <ThemedText style={[styles.buttonText, { color: theme.background }]}>
+                Create account
+              </ThemedText>
+            )}
+          </Pressable>
+
+          <Link href="/(auth)/sign-in" asChild>
+            <Pressable>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.link}>
+                Already have an account?{' '}
+                <ThemedText type="small" style={{ color: theme.text }}>
+                  Sign in
+                </ThemedText>
+              </ThemedText>
+            </Pressable>
+          </Link>
+        </ThemedView>
+      </SafeAreaView>
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  safeArea: {
+    flex: 1,
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.four,
+  },
+  card: {
+    gap: Spacing.three,
+  },
+  heading: {
+    marginBottom: Spacing.two,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two + Spacing.half,
+    fontSize: 16,
+  },
+  error: {
+    color: '#E5484D',
+  },
+  button: {
+    borderRadius: Spacing.two,
+    paddingVertical: Spacing.two + Spacing.half,
+    alignItems: 'center',
+    marginTop: Spacing.one,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  link: {
+    textAlign: 'center',
+    marginTop: Spacing.one,
+  },
+});
