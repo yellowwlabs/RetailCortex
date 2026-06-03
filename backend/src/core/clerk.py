@@ -6,6 +6,8 @@ from jose import JWTError, jwt
 
 from src.config import settings
 
+_CLERK_API = "https://api.clerk.com/v1"
+
 _jwks_cache: dict = {}
 _jwks_fetched_at: float = 0
 _JWKS_TTL = 3600
@@ -49,3 +51,14 @@ async def verify_clerk_token(token: str) -> dict:
         raise ValueError("Token missing sub claim")
 
     return payload
+
+
+async def set_user_public_metadata(clerk_user_id: str, metadata: dict) -> None:
+    async with httpx.AsyncClient() as client:
+        resp = await client.patch(
+            f"{_CLERK_API}/users/{clerk_user_id}",
+            headers={"Authorization": f"Bearer {settings.clerk_secret_key}"},
+            json={"public_metadata": metadata},
+            timeout=10,
+        )
+        resp.raise_for_status()
