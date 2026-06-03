@@ -1,11 +1,15 @@
+import asyncio
 import time
+
 import httpx
-from jose import jwt, JWTError
+from jose import JWTError, jwt
+
 from src.config import settings
 
 _jwks_cache: dict = {}
 _jwks_fetched_at: float = 0
-_JWKS_TTL = 3600  # 1 hour
+_JWKS_TTL = 3600
+_jwks_lock = asyncio.Lock()
 
 
 async def _get_jwks() -> dict:
@@ -14,12 +18,18 @@ async def _get_jwks() -> dict:
     if _jwks_cache and (time.time() - _jwks_fetched_at) < _JWKS_TTL:
         return _jwks_cache
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(settings.clerk_jwks_url, timeout=10)
-        resp.raise_for_status()
+    async with _jwks_lock:
+        # Re-check after acquiring lock — another coroutine may have fetched already
+        if _jwks_cache and (time.time() - _jwks_fetched_at) < _JWKS_TTL:
+            return _jwks_cache
 
-    _jwks_cache = resp.json()
-    _jwks_fetched_at = time.time()
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(settings.clerk_jwks_url, timeout=10)
+            resp.raise_for_status()
+
+        _jwks_cache = resp.json()
+        _jwks_fetched_at = time.time()
+
     return _jwks_cache
 
 
