@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {[
               { label: 'Overview', href: '/dashboard' },
               { label: 'Stores', href: '/dashboard/stores' },
-              { label: 'Products', href: '/dashboard/products' },
+              { label: 'Store', href: '/dashboard/store' },
               { label: 'Analytics', href: '/dashboard/analytics' },
             ].map((item) => (
               <Link
