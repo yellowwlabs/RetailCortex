@@ -1,4 +1,4 @@
-import { SignUp } from "@clerk/nextjs";
+import { SignUp } from '@clerk/nextjs';
 
 export default function SignUpPage() {
   return (
@@ -8,9 +8,7 @@ export default function SignUpPage() {
           <div className="w-7 h-7 rounded-md bg-indigo-500 flex items-center justify-center">
             <span className="text-white font-bold text-xs">RC</span>
           </div>
-          <span className="font-semibold text-white tracking-tight text-lg">
-            RetailCortex
-          </span>
+          <span className="font-semibold text-white tracking-tight text-lg">RetailCortex</span>
         </div>
         <p className="text-zinc-500 text-sm">Create your account</p>
       </div>

@@ -1,11 +1,7 @@
-import { UserButton } from "@clerk/nextjs";
-import Link from "next/link";
+import { UserButton } from '@clerk/nextjs';
+import Link from 'next/link';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col">
       <header className="flex items-center justify-between px-8 py-4 border-b border-zinc-800">
@@ -14,16 +10,14 @@ export default function DashboardLayout({
             <div className="w-7 h-7 rounded-md bg-indigo-500 flex items-center justify-center">
               <span className="text-white font-bold text-xs">RC</span>
             </div>
-            <span className="font-semibold text-white tracking-tight">
-              RetailCortex
-            </span>
+            <span className="font-semibold text-white tracking-tight">RetailCortex</span>
           </Link>
           <nav className="hidden sm:flex items-center gap-1">
             {[
-              { label: "Overview", href: "/dashboard" },
-              { label: "Stores", href: "/dashboard/stores" },
-              { label: "Products", href: "/dashboard/products" },
-              { label: "Analytics", href: "/dashboard/analytics" },
+              { label: 'Overview', href: '/dashboard' },
+              { label: 'Stores', href: '/dashboard/stores' },
+              { label: 'Products', href: '/dashboard/products' },
+              { label: 'Analytics', href: '/dashboard/analytics' },
             ].map((item) => (
               <Link
                 key={item.href}
