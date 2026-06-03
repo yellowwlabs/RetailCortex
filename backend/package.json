@@ -4,6 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "uv run uvicorn src.main:app --reload --port 8000",
-    "agent": "uv run python -m src.agent.server"
+    "agent": "uv run python -m src.agent.server",
+    "lint": "uv run ruff check src/",
+    "format": "uv run ruff format src/",
+    "test": "uv run pytest",
+    "migrate": "uv run aerich upgrade",
+    "migrate:make": "uv run aerich migrate"
   }
 }
