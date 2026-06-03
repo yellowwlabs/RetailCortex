@@ -1,7 +1,10 @@
 import { ClerkProvider } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import { DarkTheme, DefaultTheme, Slot, ThemeProvider } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { useColorScheme } from 'react-native';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 

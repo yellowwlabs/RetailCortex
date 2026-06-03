@@ -48,3 +48,6 @@ next-env.d.ts
 .omc
 
 /keys/googleServiceAccount.json
+
+
+__pycache__

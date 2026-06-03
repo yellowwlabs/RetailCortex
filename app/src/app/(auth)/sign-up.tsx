@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { OAuthButtons } from '@/components/oauth-buttons';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
@@ -147,6 +148,8 @@ export default function SignUpScreen() {
               </ThemedText>
             )}
           </Pressable>
+
+          <OAuthButtons onError={setError} />
 
           <Link href="/(auth)/sign-in" asChild>
             <Pressable>
