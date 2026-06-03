@@ -9,3 +9,8 @@ allowBuilds:
   sharp: false
   unrs-resolver: false
   "@clerk/shared": true
+  browser-tabs-lock: true
+  bufferutil: true
+  core-js: true
+  msgpackr-extract: true
+  utf-8-validate: true
