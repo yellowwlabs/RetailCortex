@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ))}
           </nav>
         </div>
-        <UserButton afterSignOutUrl="/" />
+        <UserButton />
       </header>
       <main className="flex-1 px-8 py-8">{children}</main>
     </div>

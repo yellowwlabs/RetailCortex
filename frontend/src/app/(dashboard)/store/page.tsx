@@ -153,7 +153,7 @@ export default function StorePage() {
     }
   }
 
-  async function handleDrop(event: React.DragEvent<HTMLLabelElement>) {
+  async function handleDrop(event: React.DragEvent) {
     event.preventDefault();
     setIsDragging(false);
     await handleFiles(event.dataTransfer.files);
