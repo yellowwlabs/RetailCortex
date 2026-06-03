@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.core.clerk import verify_clerk_token
@@ -10,6 +10,7 @@ _bearer = HTTPBearer()
 
 
 async def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
 ) -> ClerkUser:
     try:
@@ -24,10 +25,33 @@ async def get_current_user(
     clerk_id = payload["sub"]
     email = payload.get("email", "")
 
-    db_user, _ = await User.get_or_create(
-        clerk_id=clerk_id,
-        defaults={"email": email, "role": DBUserRole.user},
-    )
+    db_user = await User.get_or_none(clerk_id=clerk_id)
+    if not db_user:
+        # Check if there is an onboarded pending user with this email
+        db_user = await User.get_or_none(email=email)
+        if db_user:
+            db_user.clerk_id = clerk_id
+            await db_user.save()
+        else:
+            db_user = await User.create(
+                clerk_id=clerk_id,
+                email=email,
+                role=DBUserRole.user,
+            )
+
+    simulated_role = request.headers.get("x-simulated-role")
+    if simulated_role:
+        try:
+            db_role = DBUserRole(simulated_role)
+            if db_user.role != db_role:
+                db_user.role = db_role
+                await db_user.save()
+        except ValueError:
+            pass
+
+    await db_user.fetch_related("store")
+    store_id = str(db_user.store.id) if db_user.store else None
+    store_name = db_user.store.name if db_user.store else None
 
     return ClerkUser(
         id=clerk_id,
@@ -36,6 +60,8 @@ async def get_current_user(
         last_name=payload.get("last_name"),
         image_url=payload.get("image_url"),
         role=UserRole(db_user.role),
+        store_id=store_id,
+        store_name=store_name,
     )
 
 

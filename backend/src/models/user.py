@@ -17,3 +17,5 @@ class ClerkUser(BaseModel):
     last_name: Optional[str] = None
     image_url: Optional[str] = None
     role: UserRole = UserRole.user
+    store_id: Optional[str] = None
+    store_name: Optional[str] = None
