@@ -7,7 +7,11 @@
       "passThroughEnv": ["pnpm_config_verify_deps_before_run"]
     },
     "build": {
-      "outputs": [".next/**", "!.next/cache/**"]
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
     }
   }
 }
