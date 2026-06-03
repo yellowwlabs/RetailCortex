@@ -85,7 +85,8 @@ export default function SignUpScreen() {
             <Pressable
               style={[styles.button, { backgroundColor: theme.text }]}
               onPress={handleVerify}
-              disabled={loading}>
+              disabled={loading}
+            >
               {loading ? (
                 <ActivityIndicator color={theme.background} />
               ) : (
@@ -136,7 +137,8 @@ export default function SignUpScreen() {
           <Pressable
             style={[styles.button, { backgroundColor: theme.text }]}
             onPress={handleSignUp}
-            disabled={loading}>
+            disabled={loading}
+          >
             {loading ? (
               <ActivityIndicator color={theme.background} />
             ) : (

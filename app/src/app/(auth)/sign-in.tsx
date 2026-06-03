@@ -73,7 +73,8 @@ export default function SignInScreen() {
           <Pressable
             style={[styles.button, { backgroundColor: theme.text }]}
             onPress={handleSignIn}
-            disabled={loading}>
+            disabled={loading}
+          >
             {loading ? (
               <ActivityIndicator color={theme.background} />
             ) : (
