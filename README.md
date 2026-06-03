@@ -4,17 +4,19 @@ RetailCortex is a modern, high-performance retail management platform built with
 
 ## 🏗️ Architecture
 
-The project is organized as a monorepo using [Turborepo](https://turbo.build/), managing three primary components:
+The project is organized as a monorepo using [Turborepo](https://turbo.build/), managing four primary components:
 
 -   **`frontend/`**: A modern web interface built with [Next.js](https://nextjs.org/).
+-   **`app/`**: A cross-platform mobile application built with [Expo](https://expo.dev/) (React Native).
 -   **`backend/`**: A high-performance API built with [FastAPI](https://fastapi.tiangolo.com/).
 -   **`infra/`**: Infrastructure as Code (IaC) using [Terraform](https://www.terraform.io/) for automated provisioning on Google Cloud Platform.
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **Framework**: Next.js (App Router)
-- **Styling**: Tailwind CSS
+### Frontend & Mobile
+- **Web Framework**: Next.js (App Router)
+- **Mobile Framework**: Expo (React Native)
+- **Styling**: Tailwind CSS (Web), Nativewind/React Native StyleSheet
 - **Language**: TypeScript
 - **Package Manager**: pnpm
 
@@ -49,7 +51,7 @@ Ensure you have the following installed:
 
 2. **Install dependencies**:
    ```bash
-   # Install frontend and root dependencies
+   # Install all frontend, mobile, and root dependencies
    pnpm install
 
    # Install backend dependencies
@@ -60,13 +62,14 @@ Ensure you have the following installed:
 
 ### Running Locally
 
-You can run both the frontend and backend simultaneously using Turbo:
+You can run the frontend, mobile app (web), and backend simultaneously using Turbo:
 
 ```bash
 pnpm dev
 ```
 
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Mobile (Web)**: [http://localhost:8081](http://localhost:8081)
 - **Backend**: [http://localhost:8000](http://localhost:8000) (Check `/health` for status)
 
 ## ☁️ Infrastructure
@@ -88,6 +91,7 @@ The `infra/` directory contains Terraform configurations to deploy the applicati
 
 ```text
 RetailCortex/
+├── app/              # Expo mobile application
 ├── backend/          # FastAPI application
 ├── frontend/         # Next.js web application
 ├── infra/            # Terraform configurations
