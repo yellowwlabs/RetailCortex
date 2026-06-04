@@ -172,7 +172,8 @@ async def create_store(
             email=email_clean,
             defaults={"clerk_id": f"pending-{email_clean}", "role": DBUserRole.store_admin},
         )
-        db_user.role = DBUserRole.store_admin
+        if db_user.role == DBUserRole.user:
+            db_user.role = DBUserRole.store_admin
         db_user.store = store
         await db_user.save()
 

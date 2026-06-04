@@ -37,6 +37,7 @@ export default function CampaignsPage() {
   useEffect(() => {
     const saved = localStorage.getItem('rc_campaigns');
     if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCampaigns(JSON.parse(saved));
     } else {
       const defaultCampaigns: Campaign[] = [

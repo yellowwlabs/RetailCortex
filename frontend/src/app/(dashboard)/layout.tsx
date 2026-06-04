@@ -1,16 +1,52 @@
 'use client';
 
-import { UserButton, useUser } from '@clerk/nextjs';
+import { UserButton, useUser, useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useActiveRole, UserRole } from '@/lib/auth-sim';
+import { apiFetch } from '@/lib/api';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { role, changeRole, isLoaded } = useActiveRole();
   const { user } = useUser();
+  const { getToken } = useAuth();
   const pathname = usePathname();
   const [localRole, setLocalRole] = useState<UserRole>('super_admin');
+
+  // Verify if DB role matches Clerk's metadata role, if mismatch, reload user & page
+  useEffect(() => {
+    async function verifyAndSyncRole() {
+      try {
+        const token = await getToken();
+        if (!token) return;
+
+        const res = await apiFetch('/api/v1/users/me', token);
+        if (res.ok) {
+          const meData = await res.json();
+          const dbRole = meData.role;
+          const effectiveClerkRole = user?.publicMetadata?.role || 'user';
+
+          if (dbRole && effectiveClerkRole !== dbRole) {
+            const lastSync = sessionStorage.getItem('rc_last_role_sync');
+            const now = Date.now();
+            if (!lastSync || now - parseInt(lastSync, 10) > 10000) {
+              sessionStorage.setItem('rc_last_role_sync', now.toString());
+              console.log(`Role mismatch detected. Clerk: ${effectiveClerkRole}, DB: ${dbRole}. Syncing and reloading...`);
+              await user?.reload();
+              window.location.reload();
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to verify and sync user role:', err);
+      }
+    }
+
+    if (isLoaded && user) {
+      verifyAndSyncRole();
+    }
+  }, [getToken, isLoaded, user]);
 
   useEffect(() => {
     setLocalRole(role);

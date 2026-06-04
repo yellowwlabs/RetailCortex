@@ -39,15 +39,19 @@ async def get_current_user(
                 role=DBUserRole.user,
             )
 
-    simulated_role = request.headers.get("x-simulated-role")
-    if simulated_role:
+    active_role = db_user.role
+    # Sync DB role to Clerk public metadata if there is a mismatch
+    jwt_role = None
+    if "metadata" in payload and isinstance(payload["metadata"], dict):
+        jwt_role = payload["metadata"].get("role")
+    
+    if jwt_role != db_user.role.value:
         try:
-            db_role = DBUserRole(simulated_role)
-            if db_user.role != db_role:
-                db_user.role = db_role
-                await db_user.save()
-        except ValueError:
-            pass
+            from src.core.clerk import set_user_public_metadata
+            await set_user_public_metadata(clerk_id, {"role": db_user.role.value})
+        except Exception as e:
+            # Log the error but don't prevent user access since the DB role is valid
+            print(f"Error syncing role to Clerk for user {clerk_id}: {e}")
 
     await db_user.fetch_related("store")
     store_id = str(db_user.store.id) if db_user.store else None
@@ -59,7 +63,7 @@ async def get_current_user(
         first_name=payload.get("first_name"),
         last_name=payload.get("last_name"),
         image_url=payload.get("image_url"),
-        role=UserRole(db_user.role),
+        role=UserRole(active_role.value),
         store_id=store_id,
         store_name=store_name,
     )
