@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from src.api.deps import require_super_admin
 from src.api.v1.routes.store.products import _IMPORTED_PRODUCTS
 from src.db.models.store import Category, Store
+from src.db.models.user import User
 from src.db.models.zone import Zone
 from src.models.user import ClerkUser
 
@@ -81,8 +82,7 @@ async def list_stores() -> list[StoreListItem]:
         zone = getattr(store, "zone", None)
         category = getattr(store, "category", None)
 
-        # Load the admin user associated with this store
-        admin = await store.admins.first() # type: ignore
+        admin = await User.filter(store_id=store.id).first()
         admin_email = admin.email if admin else None
 
         items.append(
@@ -164,7 +164,6 @@ async def create_store(
     )
 
     if data.admin_email:
-        from src.db.models.user import User
         from src.db.models.user import UserRole as DBUserRole
 
         email_clean = data.admin_email.strip().lower()
