@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -21,7 +20,7 @@ class CongestionEvent(CongestionEventCreate):
 
 
 class FacilityIssueCreate(BaseModel):
-    zone_id: Optional[str] = None
+    zone_id: str | None = None
     title: str
     description: str = ""
     facility_type: FacilityType = FacilityType.other
@@ -32,6 +31,6 @@ class FacilityIssue(FacilityIssueCreate):
     id: str
     status: IssueStatus
     reported_at: datetime
-    resolved_at: Optional[datetime] = None
+    resolved_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)

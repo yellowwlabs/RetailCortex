@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from src.api.deps import get_db_user, require_super_admin
@@ -45,7 +43,7 @@ async def record_activity(
 
 @router.get("/me/history", response_model=ActivityListResponse)
 async def get_my_history(
-    event_type: Optional[ActivityEventType] = Query(None),
+    event_type: ActivityEventType | None = Query(None),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db_user: User = Depends(get_db_user),
@@ -65,7 +63,7 @@ async def get_my_history(
 
 @router.delete("/me/history", status_code=status.HTTP_204_NO_CONTENT)
 async def clear_my_history(
-    event_type: Optional[ActivityEventType] = Query(None),
+    event_type: ActivityEventType | None = Query(None),
     db_user: User = Depends(get_db_user),
 ):
     qs = UserActivity.filter(user=db_user)
@@ -88,7 +86,7 @@ async def delete_my_history_item(
 @router.get("/{clerk_user_id}/history", response_model=ActivityListResponse)
 async def get_user_history(
     clerk_user_id: str,
-    event_type: Optional[ActivityEventType] = Query(None),
+    event_type: ActivityEventType | None = Query(None),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     _admin: ClerkUser = Depends(require_super_admin),

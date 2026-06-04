@@ -1,10 +1,9 @@
 import enum
-from typing import Optional
 
 from pydantic import BaseModel
 
 
-class UserRole(str, enum.Enum):
+class UserRole(enum.StrEnum):
     user = "user"
     store_admin = "store_admin"
     super_admin = "super_admin"
@@ -13,9 +12,9 @@ class UserRole(str, enum.Enum):
 class ClerkUser(BaseModel):
     id: str
     email: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    image_url: Optional[str] = None
+    first_name: str | None = None
+    last_name: str | None = None
+    image_url: str | None = None
     role: UserRole = UserRole.user
-    store_id: Optional[str] = None
-    store_name: Optional[str] = None
+    store_id: str | None = None
+    store_name: str | None = None
