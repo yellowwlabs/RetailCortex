@@ -46,6 +46,5 @@ async def update_user_role(
 async def list_users(_admin: ClerkUser = Depends(require_super_admin)) -> List[ClerkUser]:
     users = await User.all().values()
     return [
-        ClerkUser(id=user["clerk_id"], email=user["email"], role=user["role"])
-        for user in users
+        ClerkUser(id=user["clerk_id"], email=user["email"], role=user["role"]) for user in users
     ]
