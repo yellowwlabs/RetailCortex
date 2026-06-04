@@ -1,0 +1,95 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "surface-dim": "#111415",
+        "surface-container-highest": "#323536",
+        "surface-variant": "#323536",
+        "surface-tint": "#c4c0ff",
+        "secondary": "#4edea3",
+        "on-secondary-fixed-variant": "#005236",
+        "surface": "#111415",
+        "on-tertiary-fixed-variant": "#7c2e00",
+        "on-tertiary-fixed": "#351000",
+        "on-secondary": "#003824",
+        "inverse-primary": "#4d3cf2",
+        "on-tertiary": "#571e00",
+        "primary-container": "#5b4dff",
+        "primary-fixed-dim": "#c4c0ff",
+        "outline-variant": "#464556",
+        "surface-container-lowest": "#0c0f10",
+        "tertiary": "#ffb595",
+        "on-secondary-container": "#00311f",
+        "on-tertiary-container": "#ffe8e0",
+        "outline": "#918fa2",
+        "on-error-container": "#ffdad6",
+        "tertiary-fixed": "#ffdbcc",
+        "surface-container": "#1d2021",
+        "background": "#111415",
+        "inverse-on-surface": "#2e3132",
+        "on-primary": "#2000a4",
+        "error-container": "#93000a",
+        "on-background": "#e1e3e4",
+        "tertiary-fixed-dim": "#ffb595",
+        "primary-fixed": "#e3dfff",
+        "surface-container-high": "#282a2b",
+        "error": "#ffb4ab",
+        "secondary-container": "#00a572",
+        "surface-bright": "#373a3b",
+        "on-surface-variant": "#c7c4d9",
+        "tertiary-container": "#b74800",
+        "on-primary-fixed": "#110068",
+        "secondary-fixed-dim": "#4edea3",
+        "inverse-surface": "#e1e3e4",
+        "on-primary-container": "#efebff",
+        "on-primary-fixed-variant": "#3311dc",
+        "secondary-fixed": "#6ffbbe",
+        "on-error": "#690005",
+        "primary": "#c4c0ff",
+        "surface-container-low": "#191c1d",
+        "on-surface": "#e1e3e4",
+        "on-secondary-fixed": "#002113"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.25rem",
+        "lg": "0.5rem",
+        "xl": "16px",
+        "full": "9999px"
+      },
+      "spacing": {
+        "md": "16px", 
+        "sm": "8px", 
+        "lg": "24px", 
+        "margin": "32px", 
+        "xxl": "64px", 
+        "xl": "32px", 
+        "xs": "4px", 
+        "gutter": "24px", 
+        "unit": "8px"
+      },
+      "fontFamily": {
+        "headline-lg-mobile": ["Hanken Grotesk"], 
+        "body-lg": ["Inter"], 
+        "headline-lg": ["Hanken Grotesk"], 
+        "headline-md": ["Hanken Grotesk"], 
+        "body-md": ["Inter"], 
+        "label-md": ["Geist"], 
+        "label-sm": ["Geist"], 
+        "headline-xl": ["Hanken Grotesk"]
+      },
+      "fontSize": {
+        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+        "body-md": ["15px", {"lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400"}],
+        "label-md": ["13px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "500"}],
+        "label-sm": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+        "headline-xl": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}]
+      }
+    }
+  },
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/container-queries')]
+}

@@ -64,6 +64,84 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => window.removeEventListener('rc-role-change', handleRoleChange);
   }, []);
 
+  // Custom cursor functionality
+  useEffect(() => {
+    const cursor = document.getElementById('custom-cursor');
+    const outline = document.getElementById('custom-cursor-outline');
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (cursor) {
+        cursor.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
+      }
+      if (outline) {
+        outline.style.transform = `translate(${e.clientX - 16}px, ${e.clientY - 16}px)`;
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+
+    document.querySelectorAll('a, button, .cursor-pointer').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        if (outline) {
+          outline.style.transform += ' scale(1.5)';
+          outline.style.background = 'rgba(196, 192, 255, 0.1)';
+        }
+        if (cursor) {
+          cursor.style.background = '#5B4DFF';
+        }
+      });
+      el.addEventListener('mouseleave', () => {
+        if (outline) {
+          outline.style.background = 'transparent';
+        }
+        if (cursor) {
+          cursor.style.background = '#c4c0ff';
+        }
+      });
+    });
+
+    // Glass card mouse tracking
+    document.querySelectorAll('.glass-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const mouseEvent = e as MouseEvent;
+        const htmlCard = card as HTMLElement;
+        const rect = htmlCard.getBoundingClientRect();
+        const x = mouseEvent.clientX - rect.left;
+        const y = mouseEvent.clientY - rect.top;
+        htmlCard.style.setProperty('--mouse-x', `${x}px`);
+        htmlCard.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+
+    // Sidebar navigation simulation
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-item').forEach(i => {
+          i.classList.remove('sidebar-item-active', 'text-primary', 'bg-primary/10');
+          i.classList.add('text-on-surface-variant');
+        });
+        item.classList.add('sidebar-item-active', 'text-primary', 'bg-primary/10');
+        item.classList.remove('text-on-surface-variant');
+      });
+    });
+
+    // Search bar focus glow
+    const searchInput = document.getElementById('search-input') || document.querySelector('input[type="text"]');
+    if (searchInput) {
+      const inputEl = searchInput as HTMLInputElement;
+      inputEl.addEventListener('focus', () => {
+        inputEl.parentElement?.classList.add('ring-1', 'ring-primary/50');
+      });
+      inputEl.addEventListener('blur', () => {
+        inputEl.parentElement?.classList.remove('ring-1', 'ring-primary/50');
+      });
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
   const isActive = (href: string) => pathname === href;
 
   const linkClass = (href: string) => {
