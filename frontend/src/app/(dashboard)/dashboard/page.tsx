@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { useActiveRole } from '@/lib/auth-sim';
 
 type StoreSummary = {
   total_products: number;
@@ -16,6 +17,7 @@ type StoreSummary = {
 export default function DashboardPage() {
   const { getToken } = useAuth();
   const { user } = useUser();
+  const { role } = useActiveRole();
   const [apiStatus, setApiStatus] = useState<'idle' | 'ok' | 'error'>('idle');
   const [summary, setSummary] = useState<StoreSummary | null>(null);
 
@@ -86,22 +88,24 @@ export default function DashboardPage() {
       </div>
 
       {/* Placeholder content area */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 flex flex-col items-center justify-center min-h-64 text-center">
-        <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
-          <span className="text-indigo-400 text-xl">◈</span>
+      {role === 'store_admin' && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 flex flex-col items-center justify-center min-h-64 text-center">
+          <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+            <span className="text-indigo-400 text-xl">◈</span>
+          </div>
+          <p className="text-zinc-300 font-medium mb-1">CSV onboarding ready</p>
+          <p className="text-zinc-600 text-sm max-w-sm mb-4">
+            Upload a CSV catalog to import products, create inventory records, and populate the search
+            index.
+          </p>
+          <Link
+            href="/dashboard/store"
+            className="inline-flex items-center rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 transition-colors"
+          >
+            Open store upload
+          </Link>
         </div>
-        <p className="text-zinc-300 font-medium mb-1">CSV onboarding ready</p>
-        <p className="text-zinc-600 text-sm max-w-sm mb-4">
-          Upload a CSV catalog to import products, create inventory records, and populate the search
-          index.
-        </p>
-        <Link
-          href="/dashboard/store"
-          className="inline-flex items-center rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 transition-colors"
-        >
-          Open store upload
-        </Link>
-      </div>
+      )}
     </div>
   );
 }
