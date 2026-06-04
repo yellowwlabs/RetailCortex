@@ -5,7 +5,7 @@ from tortoise import fields
 from src.db.models.base import BaseModel
 
 
-class UserRole(str, enum.Enum):
+class UserRole(enum.StrEnum):
     user = "user"
     store_admin = "store_admin"
     super_admin = "super_admin"

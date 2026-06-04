@@ -5,7 +5,7 @@ from tortoise import fields
 from src.db.models.base import BaseModel
 
 
-class ActivityEventType(str, enum.Enum):
+class ActivityEventType(enum.StrEnum):
     search = "search"
     feature_usage = "feature_usage"
 

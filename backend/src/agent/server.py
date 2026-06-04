@@ -1,10 +1,10 @@
 from decimal import Decimal
-from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 
 from src.db.models.congestion import CongestionEvent as CongestionDB
-from src.db.models.facility import FacilityIssue as FacilityDB, FacilityType
+from src.db.models.facility import FacilityIssue as FacilityDB
+from src.db.models.facility import FacilityType
 from src.db.models.product import Product as ProductDB
 from src.integrations.dynatrace import DynatraceIntegration
 from src.integrations.elastic import ElasticIntegration
@@ -13,7 +13,7 @@ mcp = FastMCP("RetailCortex Agent")
 
 
 @mcp.tool()
-async def search_products(query: str, max_price: Optional[float] = None):
+async def search_products(query: str, max_price: float | None = None):
     """Search for products in the retail catalog. Use for queries like "find shoes under 5000"."""
     filters = {}
     if max_price is not None:

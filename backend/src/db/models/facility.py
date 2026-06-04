@@ -5,20 +5,20 @@ from tortoise import fields
 from src.db.models.base import BaseModel
 
 
-class IssueSeverity(str, enum.Enum):
+class IssueSeverity(enum.StrEnum):
     low = "low"
     medium = "medium"
     high = "high"
     critical = "critical"
 
 
-class IssueStatus(str, enum.Enum):
+class IssueStatus(enum.StrEnum):
     open = "open"
     in_progress = "in_progress"
     resolved = "resolved"
 
 
-class FacilityType(str, enum.Enum):
+class FacilityType(enum.StrEnum):
     elevator = "elevator"
     escalator = "escalator"
     hvac = "hvac"

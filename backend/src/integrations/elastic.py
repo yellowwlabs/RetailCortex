@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from src.config import settings
 
@@ -17,7 +17,7 @@ class ElasticIntegration:
 
     @staticmethod
     async def search_products(
-        query: str, filters: Optional[dict[str, Any]] = None
+        query: str, filters: dict[str, Any] | None = None
     ) -> list[dict[str, Any]]:
         if not settings.elastic_cloud_id or not settings.elastic_api_key:
             return []

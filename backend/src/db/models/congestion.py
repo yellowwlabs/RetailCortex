@@ -5,7 +5,7 @@ from tortoise import fields
 from src.db.models.base import BaseModel
 
 
-class CongestionLevel(str, enum.Enum):
+class CongestionLevel(enum.StrEnum):
     low = "low"
     medium = "medium"
     high = "high"
