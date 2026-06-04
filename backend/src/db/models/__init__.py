@@ -1,6 +1,7 @@
 from src.db.models.activity import ActivityEventType, UserActivity
 from src.db.models.congestion import CongestionEvent, CongestionLevel
 from src.db.models.facility import FacilityIssue, IssueSeverity, IssueStatus
+from src.db.models.notification import Notification
 from src.db.models.product import Product
 from src.db.models.promotion import Promotion
 from src.db.models.store import Category, Store
@@ -22,4 +23,5 @@ __all__ = [
     "FacilityIssue",
     "IssueSeverity",
     "IssueStatus",
+    "Notification",
 ]
