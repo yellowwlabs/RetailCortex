@@ -19,8 +19,9 @@ class Settings(BaseSettings):
     dynatrace_url: str = ""
     dynatrace_token: str = ""
 
-    # Google Cloud / Gemini Settings
+    # Google Cloud / Vertex AI Gemini
     google_cloud_project: str = ""
+    google_cloud_location: str = "us-central1"
     google_application_credentials: str = ""
 
 
