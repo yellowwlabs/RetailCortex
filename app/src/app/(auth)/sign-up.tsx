@@ -11,7 +11,7 @@ import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function SignUpScreen() {
-  const { signUp, setActive, isLoaded } = useSignUp();
+  const { signUp, setActive, isLoaded } = useSignUp() as any;
   const router = useRouter();
   const theme = useTheme();
 

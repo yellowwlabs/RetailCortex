@@ -13,9 +13,15 @@ export function useApi() {
   const signOutRef = useRef(signOut);
   const routerRef = useRef(router);
 
-  useEffect(() => { getTokenRef.current = getToken; }, [getToken]);
-  useEffect(() => { signOutRef.current = signOut; }, [signOut]);
-  useEffect(() => { routerRef.current = router; }, [router]);
+  useEffect(() => {
+    getTokenRef.current = getToken;
+  }, [getToken]);
+  useEffect(() => {
+    signOutRef.current = signOut;
+  }, [signOut]);
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   const apiFetch = useCallback(async <T>(path: string, init?: RequestInit): Promise<T> => {
     const token = await getTokenRef.current();

@@ -42,7 +42,13 @@ const initialState: HistoryState = {
 
 export const fetchHistory = createAsyncThunk<
   { items: ActivityItem[]; total: number; limit: number; offset: number },
-  { token: string; limit?: number; offset?: number; eventType?: ActivityEventType; force?: boolean },
+  {
+    token: string;
+    limit?: number;
+    offset?: number;
+    eventType?: ActivityEventType;
+    force?: boolean;
+  },
   { state: { history: HistoryState } }
 >(
   'history/fetch',
@@ -52,7 +58,7 @@ export const fetchHistory = createAsyncThunk<
       if (eventType) params.set('event_type', eventType);
       const res = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/me/history?${params}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (!res.ok) throw new Error(await res.text());
       return res.json();
@@ -68,47 +74,41 @@ export const fetchHistory = createAsyncThunk<
       if (lastFetchedAt && Date.now() - lastFetchedAt < CACHE_TTL_MS) return false;
       return true;
     },
-  }
+  },
 );
 
 export const recordActivity = createAsyncThunk<
   ActivityItem,
   { token: string } & RecordActivityPayload
->(
-  'history/record',
-  async ({ token, ...body }, { rejectWithValue }) => {
-    try {
-      const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/me/history`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        }
-      );
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    } catch (err) {
-      return rejectWithValue(err instanceof Error ? err.message : 'Failed to record activity');
-    }
+>('history/record', async ({ token, ...body }, { rejectWithValue }) => {
+  try {
+    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/me/history`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  } catch (err) {
+    return rejectWithValue(err instanceof Error ? err.message : 'Failed to record activity');
   }
-);
+});
 
-export const clearHistory = createAsyncThunk<void, { token: string; eventType?: ActivityEventType }>(
-  'history/clear',
-  async ({ token, eventType }, { rejectWithValue }) => {
-    try {
-      const params = eventType ? `?event_type=${eventType}` : '';
-      const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/me/history${params}`,
-        { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error(await res.text());
-    } catch (err) {
-      return rejectWithValue(err instanceof Error ? err.message : 'Failed to clear history');
-    }
+export const clearHistory = createAsyncThunk<
+  void,
+  { token: string; eventType?: ActivityEventType }
+>('history/clear', async ({ token, eventType }, { rejectWithValue }) => {
+  try {
+    const params = eventType ? `?event_type=${eventType}` : '';
+    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/me/history${params}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(await res.text());
+  } catch (err) {
+    return rejectWithValue(err instanceof Error ? err.message : 'Failed to clear history');
   }
-);
+});
 
 const historySlice = createSlice({
   name: 'history',

@@ -29,7 +29,7 @@ export const fetchStores = createAsyncThunk<
     try {
       const res = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000'}/api/v1/stores`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (!res.ok) throw new Error(await res.text());
       return res.json();
@@ -45,7 +45,7 @@ export const fetchStores = createAsyncThunk<
       if (lastFetchedAt && Date.now() - lastFetchedAt < CACHE_TTL_MS) return false;
       return true;
     },
-  }
+  },
 );
 
 const storesSlice = createSlice({
