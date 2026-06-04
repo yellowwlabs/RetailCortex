@@ -19,7 +19,7 @@ variable "google_region" {
 variable "backend_image" {
   description = "Container image URI for the Cloud Run backend (e.g. us-central1-docker.pkg.dev/PROJECT/retailcortex-backend/api:latest). Use the placeholder on first apply before an image is pushed."
   type        = string
-  default     = "us-docker.pkg.dev/cloudrun/container/hello"
+  default     = "us-central1-docker.pkg.dev/atlas-489407/retailcortex-backend/api:latest"
 }
 
 variable "allowed_origins" {
