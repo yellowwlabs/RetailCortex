@@ -40,11 +40,17 @@ type CategoryListItem = {
   slug: string;
 };
 
+type UserListItem = {
+  id: string;
+  email: string;
+};
+
 export default function StoresPage() {
   const { getToken } = useAuth();
   const [stores, setStores] = useState<StoreListItem[]>([]);
   const [zones, setZones] = useState<ZoneListItem[]>([]);
   const [categories, setCategories] = useState<CategoryListItem[]>([]);
+  const [users, setUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('Loading stores...');
   const [showOnboardForm, setShowOnboardForm] = useState(false);
@@ -76,27 +82,32 @@ export default function StoresPage() {
     }
   }
 
-  async function loadMetadata() {
-    try {
-      const token = await getToken();
-      const [zonesRes, categoriesRes] = await Promise.all([
-        apiFetch('/api/v1/stores/zones', token),
-        apiFetch('/api/v1/stores/categories', token),
-      ]);
+   async function loadMetadata() {
+     try {
+       const token = await getToken();
+       const [zonesRes, categoriesRes, usersRes] = await Promise.all([
+         apiFetch('/api/v1/stores/zones', token),
+         apiFetch('/api/v1/stores/categories', token),
+         apiFetch('/api/v1/users', token),
+       ]);
 
-      if (zonesRes.ok) {
-        const zonesData = (await zonesRes.json()) as ZoneListItem[];
-        setZones(zonesData);
-        if (zonesData.length) setSelectedZoneId(zonesData[0].id);
-      }
-      if (categoriesRes.ok) {
-        const categoriesData = (await categoriesRes.json()) as CategoryListItem[];
-        setCategories(categoriesData);
-      }
-    } catch (e) {
-      console.error('Error loading metadata', e);
-    }
-  }
+       if (zonesRes.ok) {
+         const zonesData = (await zonesRes.json()) as ZoneListItem[];
+         setZones(zonesData);
+         if (zonesData.length) setSelectedZoneId(zonesData[0].id);
+       }
+       if (categoriesRes.ok) {
+         const categoriesData = (await categoriesRes.json()) as CategoryListItem[];
+         setCategories(categoriesData);
+       }
+       if (usersRes.ok) {
+         const usersData = (await usersRes.json()) as UserListItem[];
+         setUsers(usersData);
+       }
+     } catch (e) {
+       console.error('Error loading metadata', e);
+     }
+   }
 
   useEffect(() => {
     async function init() {
@@ -233,16 +244,25 @@ export default function StoresPage() {
               />
             </div>
 
-            <div className="col-span-2 space-y-1">
-              <label className="text-xs text-zinc-400">Admin Email Address</label>
-              <input
-                type="email"
-                value={adminEmail}
-                onChange={(e) => setAdminEmail(e.target.value)}
-                placeholder="e.g. nike.admin@mall.com"
-                className="w-full text-sm rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-200 outline-none focus:border-indigo-500"
-              />
-            </div>
+             <div className="col-span-2 space-y-1">
+               <label className="text-xs text-zinc-400">Store Admin</label>
+               <select
+                 value={adminEmail}
+                 onChange={(e) => setAdminEmail(e.target.value)}
+                 className="w-full text-sm rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-200 outline-none focus:border-indigo-500 cursor-pointer"
+               >
+                 <option value="">Unassigned</option>
+                 {users.length > 0 ? (
+                   users.map((user) => (
+                     <option key={user.id} value={user.email}>
+                       {user.email}
+                     </option>
+                   ))
+                 ) : (
+                   <option value="" disabled>No users available</option>
+                 )}
+               </select>
+             </div>
 
             <div className="col-span-2 space-y-1">
               <label className="text-xs text-zinc-400">Description</label>

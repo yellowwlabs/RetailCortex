@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
 from pydantic import BaseModel
 
 from src.api.deps import get_current_user, require_super_admin
@@ -39,3 +40,12 @@ async def update_user_role(
         email=db_user.email,
         role=body.role,
     )
+
+
+@router.get("/", response_model=List[ClerkUser])
+async def list_users(_admin: ClerkUser = Depends(require_super_admin)) -> List[ClerkUser]:
+    users = await User.all().values()
+    return [
+        ClerkUser(id=user["clerk_id"], email=user["email"], role=user["role"])
+        for user in users
+    ]
