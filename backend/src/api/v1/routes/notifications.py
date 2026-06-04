@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-
 from pydantic import BaseModel
 
 from src.api.deps import get_db_user
