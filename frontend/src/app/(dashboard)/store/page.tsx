@@ -84,7 +84,7 @@ export default function StorePage() {
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [storeName, setStoreName] = useState('');
   const [assignedStoreName, setAssignedStoreName] = useState<string | null>(null);
-  const [users, setUsers] = useState<Array<{id: string, name: string}>>([]);
+  const [users, setUsers] = useState<Array<{ id: string; name: string }>>([]);
   const [busy, setBusy] = useState<'validate' | 'import' | 'template' | null>(null);
   const [message, setMessage] = useState('Use the sample CSV or upload your own product catalog.');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -265,31 +265,35 @@ export default function StorePage() {
         </Link>
       </div>
 
-        {assignedStoreName && (
-          <div className="rounded-2xl bg-indigo-600/10 border border-indigo-500/20 px-5 py-3 text-sm text-indigo-300 flex items-center gap-3">
-            <span className="h-2 w-2 rounded-full bg-indigo-400" />
-            <span>
-              Importing catalog specifically for your store:{' '}
-              <strong className="text-white">{assignedStoreName}</strong>
-            </span>
-          </div>
-        )}
-        {/* If no store assigned, show dropdown */}
-        {!assignedStoreName && users.length > 0 && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-zinc-300 mb-1">Select Store (User)</label>
-            <select
-              className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
-              value={storeName}
-              onChange={(e) => setStoreName(e.target.value)}
-            >
-              <option value="">-- Choose Store --</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.name}>{u.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
+      {assignedStoreName && (
+        <div className="rounded-2xl bg-indigo-600/10 border border-indigo-500/20 px-5 py-3 text-sm text-indigo-300 flex items-center gap-3">
+          <span className="h-2 w-2 rounded-full bg-indigo-400" />
+          <span>
+            Importing catalog specifically for your store:{' '}
+            <strong className="text-white">{assignedStoreName}</strong>
+          </span>
+        </div>
+      )}
+      {/* If no store assigned, show dropdown */}
+      {!assignedStoreName && users.length > 0 && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-zinc-300 mb-1">
+            Select Store (User)
+          </label>
+          <select
+            className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-white"
+            value={storeName}
+            onChange={(e) => setStoreName(e.target.value)}
+          >
+            <option value="">-- Choose Store --</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.name}>
+                {u.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-4">
         {[

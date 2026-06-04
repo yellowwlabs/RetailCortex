@@ -100,6 +100,22 @@ export default function CampaignsPage() {
     setCampaigns(updated);
     localStorage.setItem('rc_campaigns', JSON.stringify(updated));
 
+    // Send backend broadcast notification
+    void (async () => {
+      try {
+        const token = await getToken();
+        await apiFetch('/api/v1/notifications/broadcast', token, {
+          method: 'POST',
+          body: JSON.stringify({
+            title: `New Offer: ${newCampaign.name}`,
+            body: `Claim ${newCampaign.discountRate}% Off at ${newCampaign.targetZone} using code "${newCampaign.couponCode}"!`,
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to broadcast campaign notification:', err);
+      }
+    })();
+
     // Reset Form
     setName('');
     setDiscountRate(15);

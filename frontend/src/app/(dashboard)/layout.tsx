@@ -32,7 +32,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             const now = Date.now();
             if (!lastSync || now - parseInt(lastSync, 10) > 10000) {
               sessionStorage.setItem('rc_last_role_sync', now.toString());
-              console.log(`Role mismatch detected. Clerk: ${effectiveClerkRole}, DB: ${dbRole}. Syncing and reloading...`);
+              console.log(
+                `Role mismatch detected. Clerk: ${effectiveClerkRole}, DB: ${dbRole}. Syncing and reloading...`,
+              );
               await user?.reload();
               window.location.reload();
             }

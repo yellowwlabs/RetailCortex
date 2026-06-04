@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { HomeHeaderUser } from '@/components/home-header-user';
 
 export default function LandingPage() {
-
   return (
     <main className="flex min-h-screen flex-col bg-[#0d0d0d] font-sans text-zinc-100 antialiased selection:bg-white/10 selection:text-white">
       {/* Header Navigation */}
