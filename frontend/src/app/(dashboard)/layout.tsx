@@ -6,6 +6,21 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useActiveRole, UserRole } from '@/lib/auth-sim';
 import { apiFetch } from '@/lib/api';
+import {
+  LayoutDashboard,
+  Package,
+  Store,
+  BarChart2,
+  FileText,
+  Settings,
+  Bell,
+  HelpCircle,
+  Search,
+  Plus,
+  Download,
+  Map,
+  ChevronRight,
+} from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { role, changeRole, isLoaded } = useActiveRole();
@@ -14,27 +29,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [localRole, setLocalRole] = useState<UserRole>('super_admin');
 
-  // Verify if DB role matches Clerk's metadata role, if mismatch, reload user & page
+  // Verify DB role vs Clerk metadata
   useEffect(() => {
     async function verifyAndSyncRole() {
       try {
         const token = await getToken();
         if (!token) return;
-
         const res = await apiFetch('/api/v1/users/me', token);
         if (res.ok) {
           const meData = await res.json();
           const dbRole = meData.role;
           const effectiveClerkRole = user?.publicMetadata?.role || 'user';
-
           if (dbRole && effectiveClerkRole !== dbRole) {
             const lastSync = sessionStorage.getItem('rc_last_role_sync');
             const now = Date.now();
             if (!lastSync || now - parseInt(lastSync, 10) > 10000) {
               sessionStorage.setItem('rc_last_role_sync', now.toString());
-              console.log(
-                `Role mismatch detected. Clerk: ${effectiveClerkRole}, DB: ${dbRole}. Syncing and reloading...`,
-              );
               await user?.reload();
               window.location.reload();
             }
@@ -44,17 +54,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         console.error('Failed to verify and sync user role:', err);
       }
     }
-
-    if (isLoaded && user) {
-      verifyAndSyncRole();
-    }
+    if (isLoaded && user) verifyAndSyncRole();
   }, [getToken, isLoaded, user]);
 
-  useEffect(() => {
-    setLocalRole(role);
-  }, [role]);
+  useEffect(() => { setLocalRole(role); }, [role]);
 
-  // Listen to custom event for dynamic re-renders across pages
   useEffect(() => {
     const handleRoleChange = () => {
       const saved = localStorage.getItem('rc_simulated_role') as UserRole | null;
@@ -64,317 +68,159 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => window.removeEventListener('rc-role-change', handleRoleChange);
   }, []);
 
-  // Custom cursor functionality
-  useEffect(() => {
-    const cursor = document.getElementById('custom-cursor');
-    const outline = document.getElementById('custom-cursor-outline');
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      if (cursor) {
-        cursor.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
-      }
-      if (outline) {
-        outline.style.transform = `translate(${e.clientX - 16}px, ${e.clientY - 16}px)`;
-      }
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-
-    document.querySelectorAll('a, button, .cursor-pointer').forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        if (outline) {
-          outline.style.transform += ' scale(1.5)';
-          outline.style.background = 'rgba(196, 192, 255, 0.1)';
-        }
-        if (cursor) {
-          cursor.style.background = '#5B4DFF';
-        }
-      });
-      el.addEventListener('mouseleave', () => {
-        if (outline) {
-          outline.style.background = 'transparent';
-        }
-        if (cursor) {
-          cursor.style.background = '#c4c0ff';
-        }
-      });
-    });
-
-    // Glass card mouse tracking
-    document.querySelectorAll('.glass-card').forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const mouseEvent = e as MouseEvent;
-        const htmlCard = card as HTMLElement;
-        const rect = htmlCard.getBoundingClientRect();
-        const x = mouseEvent.clientX - rect.left;
-        const y = mouseEvent.clientY - rect.top;
-        htmlCard.style.setProperty('--mouse-x', `${x}px`);
-        htmlCard.style.setProperty('--mouse-y', `${y}px`);
-      });
-    });
-
-    // Sidebar navigation simulation
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.sidebar-item').forEach(i => {
-          i.classList.remove('sidebar-item-active', 'text-primary', 'bg-primary/10');
-          i.classList.add('text-on-surface-variant');
-        });
-        item.classList.add('sidebar-item-active', 'text-primary', 'bg-primary/10');
-        item.classList.remove('text-on-surface-variant');
-      });
-    });
-
-    // Search bar focus glow
-    const searchInput = document.getElementById('search-input') || document.querySelector('input[type="text"]');
-    if (searchInput) {
-      const inputEl = searchInput as HTMLInputElement;
-      inputEl.addEventListener('focus', () => {
-        inputEl.parentElement?.classList.add('ring-1', 'ring-primary/50');
-      });
-      inputEl.addEventListener('blur', () => {
-        inputEl.parentElement?.classList.remove('ring-1', 'ring-primary/50');
-      });
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []);
-
   const isActive = (href: string) => pathname === href;
 
-  const linkClass = (href: string) => {
+  const navItem = (href: string, Icon: React.ElementType, label: string) => {
     const active = isActive(href);
-    return `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-      active
-        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10'
-        : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
-    }`;
+    return (
+      <Link
+        href={href}
+        className={`flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-150 group ${
+          active
+            ? 'bg-[#0a1a0a] text-[#00e87a] border border-[#00e87a]/20'
+            : 'text-zinc-400 hover:text-white hover:bg-white/5'
+        }`}
+      >
+        <Icon
+          size={16}
+          className={`shrink-0 transition-colors ${active ? 'text-[#00e87a]' : 'text-zinc-500 group-hover:text-zinc-300'}`}
+        />
+        <span>{label}</span>
+        {active && (
+          <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#00e87a] shadow-[0_0_6px_#00e87a]" />
+        )}
+      </Link>
+    );
+  };
+
+  const currentPageTitle = () => {
+    if (isActive('/dashboard')) return 'Store Manager';
+    const last = pathname.split('/').pop();
+    return last ? last.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Dashboard';
   };
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 text-zinc-100 font-sans antialiased">
-      {/* Sidebar aside panel */}
-      <aside className="w-64 border-r border-zinc-900 bg-zinc-900/10 backdrop-blur-md flex flex-col shrink-0">
-        {/* Branding header */}
-        <div className="p-6 border-b border-zinc-900">
+    <div className="flex min-h-screen bg-black text-white font-sans antialiased">
+
+      {/* ── Sidebar ── */}
+      <aside className="w-56 flex flex-col shrink-0 border-r border-zinc-900 bg-black">
+
+        {/* Branding */}
+        <div className="px-5 pt-6 pb-5 border-b border-zinc-900">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 shadow-lg shadow-indigo-600/30">
-              <span className="text-xs font-bold text-white tracking-wider">RC</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded bg-[#00e87a]/10 border border-[#00e87a]/30">
+              <span className="text-[10px] font-bold text-[#00e87a] tracking-wider">RC</span>
             </div>
-            <span className="text-lg font-bold tracking-tight text-white">RetailCortex</span>
+            <div>
+              <p className="text-sm font-bold tracking-tight text-white leading-none">RetailCortex</p>
+              <p className="text-[9px] font-medium text-zinc-500 uppercase tracking-widest mt-0.5">
+                Global Operations
+              </p>
+            </div>
           </Link>
         </div>
 
-        {/* Sidebar Nav menu scroll list */}
-        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-          {/* General Section */}
-          <div className="space-y-2">
-            <span className="px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block">
-              Main Menu
-            </span>
-            <Link href="/dashboard" className={linkClass('/dashboard')}>
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"
-                />
-              </svg>
-              Overview
-            </Link>
-          </div>
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1">
+          {navItem('/dashboard', LayoutDashboard, 'Dashboard')}
+          {navItem('/dashboard/stores', Package, 'Inventory')}
+          {navItem('/dashboard/zones', Store, 'Stores')}
+          {navItem('/dashboard/categories', BarChart2, 'Analytics')}
+          {navItem('/dashboard/campaigns', FileText, 'Reports')}
+          {navItem('/dashboard/settings', Settings, 'Settings')}
+        </nav>
 
-          {/* Super Admin Sections */}
-          {localRole === 'super_admin' && (
-            <div className="space-y-2">
-              <span className="px-4 text-[10px] font-semibold text-indigo-400 uppercase tracking-widest block">
-                Super Admin Only
-              </span>
-
-              <Link href="/dashboard/stores" className={linkClass('/dashboard/stores')}>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  />
-                </svg>
-                Onboard Stores
-              </Link>
-
-              <Link href="/dashboard/zones" className={linkClass('/dashboard/zones')}>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                Manage Zones
-              </Link>
-
-              <Link href="/dashboard/categories" className={linkClass('/dashboard/categories')}>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M7 7h.01M6 20h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-                Manage Categories
-              </Link>
-            </div>
-          )}
-
-          {/* Store Admin Sections */}
-          {localRole === 'store_admin' && (
-            <div className="space-y-2">
-              <span className="px-4 text-[10px] font-semibold text-emerald-400 uppercase tracking-widest block">
-                Store Admin Only
-              </span>
-
-              <Link href="/dashboard/store" className={linkClass('/dashboard/store')}>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                  />
-                </svg>
-                CSV Upload Products
-              </Link>
-
-              <Link href="/dashboard/inventory" className={linkClass('/dashboard/inventory')}>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
-                Manage Inventory
-              </Link>
-
-              <Link href="/dashboard/campaigns" className={linkClass('/dashboard/campaigns')}>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
-                  />
-                </svg>
-                Store Campaigns
-              </Link>
-            </div>
-          )}
-
-          {/* User/Shopper Sections (Debug Placeholder) */}
-          {localRole === 'user' && (
-            <div className="space-y-2">
-              <span className="px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block">
-                Shopper View
-              </span>
-              <div className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-center">
-                <p className="text-xs text-zinc-500 leading-relaxed">
-                  Shopper controls are managed in the Mobile App.
+        {/* User */}
+        {isLoaded && user && (
+          <div className="px-3 py-4 border-t border-zinc-900">
+            <div className="flex items-center gap-2.5 px-2 py-2 rounded-md bg-zinc-950 border border-zinc-900">
+              <UserButton showName={false} />
+              <div className="overflow-hidden flex-1 min-w-0">
+                <p className="text-xs font-semibold text-white truncate">
+                  {user.fullName || user.username || 'Admin'}
+                </p>
+                <p className="text-[10px] text-zinc-500 truncate">
+                  {user.primaryEmailAddress?.emailAddress}
                 </p>
               </div>
             </div>
-          )}
-        </nav>
+          </div>
+        )}
 
-        <div className="p-4 border-t border-zinc-900 bg-zinc-950/40 space-y-4">
-          {/* Active Role details */}
-          {isLoaded && user && (
-            <div className="flex items-center justify-between gap-3 bg-zinc-900/20 border border-zinc-900 p-3 rounded-2xl">
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                <UserButton showName={false} />
-                <div className="text-left overflow-hidden">
-                  <p className="text-xs font-semibold text-white truncate">
-                    {user.fullName || user.username || 'Admin User'}
-                  </p>
-                  <p className="text-[10px] text-zinc-500 truncate">
-                    {user.primaryEmailAddress?.emailAddress}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* + New Store */}
+        <div className="px-3 pb-4">
+          <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-zinc-800 bg-zinc-950 text-xs font-medium text-zinc-300 hover:border-[#00e87a]/40 hover:text-[#00e87a] hover:bg-[#00e87a]/5 transition-all duration-150">
+            <Plus size={13} />
+            New Store
+          </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      {/* ── Main Area ── */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+
         {/* Top Header */}
-        <header className="h-16 border-b border-zinc-900 px-8 flex items-center justify-between bg-zinc-950/20 backdrop-blur-md">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs text-zinc-500">Workspace</span>
-            <span className="text-xs text-zinc-700">/</span>
-            <span className="text-xs text-zinc-300 font-semibold uppercase tracking-wider">
-              {isActive('/dashboard') ? 'Overview' : pathname.split('/').pop()?.replace('-', ' ')}
-            </span>
+        <header className="h-14 border-b border-zinc-900 px-6 flex items-center justify-between bg-black shrink-0">
+
+          {/* Left: title + tab */}
+          <div className="flex items-center gap-6">
+            <div>
+              <h1 className="text-base font-bold text-white leading-none">{currentPageTitle()}</h1>
+            </div>
+            <div className="flex items-center gap-1 border-b-2 border-[#00e87a] pb-[14px] -mb-[1px]">
+              <button className="text-xs font-semibold text-white px-1">Bulk actions</button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={`h-2 w-2 rounded-full ${localRole === 'super_admin' ? 'bg-indigo-500' : localRole === 'store_admin' ? 'bg-emerald-500' : 'bg-zinc-500'}`}
-            />
-            <span className="text-[11px] font-semibold tracking-wider uppercase text-zinc-400">
-              {localRole} Mode
-            </span>
+
+          {/* Right: actions */}
+          <div className="flex items-center gap-3">
+            <button className="text-xs text-zinc-400 hover:text-white transition-colors font-medium flex items-center gap-1.5">
+              <Download size={13} />
+              Export
+            </button>
+
+            {/* Search */}
+            <div className="relative flex items-center">
+              <Search size={13} className="absolute left-3 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Search stores, regions..."
+                className="bg-zinc-900/60 border border-zinc-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-[#00e87a]/40 focus:bg-zinc-900 transition-all w-48"
+              />
+            </div>
+
+            {/* Bell */}
+            <button className="relative p-1.5 rounded-md hover:bg-zinc-900 transition-colors text-zinc-400 hover:text-white">
+              <Bell size={15} />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#00e87a] rounded-full shadow-[0_0_4px_#00e87a]" />
+            </button>
+
+            {/* Help */}
+            <button className="p-1.5 rounded-md hover:bg-zinc-900 transition-colors text-zinc-400 hover:text-white">
+              <HelpCircle size={15} />
+            </button>
+
+            {/* Create Report */}
+            <button className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-xs font-medium text-zinc-200 hover:text-white px-3 py-1.5 rounded-lg transition-all duration-150">
+              <FileText size={12} />
+              Create Report
+            </button>
+
+            {/* Avatar */}
+            {isLoaded && user && (
+              <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-semibold text-white shrink-0 overflow-hidden">
+                {user.imageUrl
+                  ? <img src={user.imageUrl} alt="avatar" className="w-full h-full object-cover" />
+                  : (user.firstName?.[0] ?? 'U')}
+              </div>
+            )}
           </div>
         </header>
 
-        {/* Dashboard inner content */}
-        <main className="flex-1 px-8 py-8 overflow-y-auto">{children}</main>
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto bg-black">
+          {children}
+        </main>
       </div>
     </div>
   );
