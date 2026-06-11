@@ -12,7 +12,6 @@ import {
   Store,
   BarChart2,
   FileText,
-  Settings,
   Bell,
   Search,
   Plus,
@@ -123,7 +122,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {navItem('/dashboard/zones', Store, 'Zones')}
           {navItem('/dashboard/categories', BarChart2, 'Categories')}
           {navItem('/dashboard/campaigns', FileText, 'Campaigns')}
-          {navItem('/dashboard/settings', Settings, 'Settings')}
         </nav>
 
         {/* User */}
