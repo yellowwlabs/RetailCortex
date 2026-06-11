@@ -84,6 +84,27 @@ interface NotificationItem {
   created_at: string;
 }
 
+interface Promotion {
+  id: string;
+  title: string;
+  description: string;
+  discount_pct: number;
+  starts_at: string;
+  ends_at: string;
+  is_active: boolean;
+  store: { id: string; name: string };
+}
+
+interface CongestionZone {
+  zone_id: string;
+  zone_name: string;
+  floor: number;
+  capacity: number;
+  occupancy: number;
+  occupancy_pct: number;
+  level: string;
+}
+
 const OFFERS = [
   { store: 'Zara', discount: '15% Off', code: 'ZARA15', category: 'Fashion' },
   { store: 'H&M', discount: '20% Off', code: 'HM20', category: 'Clothing' },
@@ -123,9 +144,16 @@ export default function HomeScreen() {
 
   const [activeModal, setActiveModal] = useState<'congestion' | 'offers' | null>(null);
 
-  const [zonesList, setZonesList] = useState<Zone[]>([]);
+  const [zonesList, setZonesList] = useState<CongestionZone[]>([]);
   const [isLoadingZones, setIsLoadingZones] = useState(false);
   const [claimedOffers, setClaimedOffers] = useState<Record<string, boolean>>({});
+
+  const [promotionsList, setPromotionsList] = useState<Promotion[]>([]);
+  const [isLoadingPromotions, setIsLoadingPromotions] = useState(false);
+
+  const [selectedStore, setSelectedStore] = useState<StoreListItem | null>(null);
+  const [storeProductsList, setStoreProductsList] = useState<Product[]>([]);
+  const [isLoadingStoreProducts, setIsLoadingStoreProducts] = useState(false);
 
   // Navigation Sidebar States
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -162,7 +190,7 @@ export default function HomeScreen() {
     }
   }, [isSidebarOpen, sidebarAnim, backdropAnim]);
   const [currentView, setCurrentView] = useState<
-    'home' | 'stores' | 'offers' | 'congestion' | 'history' | 'search' | 'notifications'
+    'home' | 'stores' | 'offers' | 'congestion' | 'history' | 'search' | 'notifications' | 'storeProducts'
   >('home');
 
   // Search filter states for subpages
@@ -335,8 +363,8 @@ export default function HomeScreen() {
     setIsLoadingZones(true);
     try {
       await recordActivity('feature_usage', { feature: 'congestion_map' });
-      const zones = await apiFetch<Zone[]>('/api/v1/stores/zones');
-      setZonesList(zones || []);
+      const res = await apiFetch<{ success: boolean; data: CongestionZone[] }>('/api/v1/operations/congestion');
+      setZonesList(res.data || []);
     } catch {
       // Fail silently
     } finally {
@@ -347,7 +375,32 @@ export default function HomeScreen() {
   // Targeted Offers Action
   const handleShowTargetedOffers = async () => {
     setCurrentView('offers');
+    if (promotionsList.length === 0) {
+      setIsLoadingPromotions(true);
+      try {
+        const data = await apiFetch<Promotion[]>('/api/v1/promotions');
+        setPromotionsList(data || []);
+      } catch {
+        // Fail silently
+      } finally {
+        setIsLoadingPromotions(false);
+      }
+    }
     await recordActivity('feature_usage', { feature: 'targeted_offers' });
+  };
+
+  const handleShowStoreProducts = async (store: StoreListItem) => {
+    setSelectedStore(store);
+    setCurrentView('storeProducts');
+    setIsLoadingStoreProducts(true);
+    try {
+      const data = await apiFetch<Product[]>(`/api/v1/stores/${store.id}/products`);
+      setStoreProductsList(data || []);
+    } catch {
+      setStoreProductsList([]);
+    } finally {
+      setIsLoadingStoreProducts(false);
+    }
   };
 
   // Semantic Search Action
@@ -1574,9 +1627,7 @@ export default function HomeScreen() {
             {isLoadingZones ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color="#B19FFB" />
-                <ThemedText style={styles.loadingText}>
-                  Syncing zone sensor capacities...
-                </ThemedText>
+                <ThemedText style={styles.loadingText}>Syncing zone sensor capacities...</ThemedText>
               </View>
             ) : zonesList.length === 0 ? (
               <View style={styles.emptyContainer}>
@@ -1585,44 +1636,33 @@ export default function HomeScreen() {
             ) : (
               <View style={{ gap: 12 }}>
                 {zonesList.map((zone) => {
-                  const hash = zone.name.charCodeAt(0) + zone.name.charCodeAt(zone.name.length - 1);
-                  const occupancy = (hash % 85) + 10;
+                  const pct = zone.occupancy_pct;
+                  const lvl = zone.level?.toLowerCase() ?? '';
                   let barColor = '#4CD964';
                   let densityLabel = 'Low Density';
-                  if (occupancy > 75) {
-                    barColor = '#FF3B30';
-                    densityLabel = 'Critical (Heavy Queues)';
-                  } else if (occupancy > 45) {
-                    barColor = '#FFCC00';
-                    densityLabel = 'Moderate Crowds';
-                  }
+                  if (lvl === 'critical' || pct > 85) { barColor = '#FF3B30'; densityLabel = 'Critical — Heavy Queues'; }
+                  else if (lvl === 'high' || pct > 65) { barColor = '#FF9500'; densityLabel = 'High — Crowded'; }
+                  else if (lvl === 'medium' || pct > 40) { barColor = '#FFCC00'; densityLabel = 'Moderate Crowds'; }
 
                   return (
-                    <View key={zone.id} style={styles.congestionPageCard}>
+                    <View key={zone.zone_id} style={styles.congestionPageCard}>
                       <View style={styles.zoneHeader}>
                         <View>
-                          <ThemedText style={styles.zoneName}>{zone.name}</ThemedText>
+                          <ThemedText style={styles.zoneName}>{zone.zone_name}</ThemedText>
                           <ThemedText style={styles.zoneFloor}>Floor {zone.floor}</ThemedText>
                         </View>
                         <ThemedText style={[styles.zoneDensityText, { color: barColor }]}>
                           {densityLabel}
                         </ThemedText>
                       </View>
-
                       <View style={styles.progressContainer}>
-                        <View
-                          style={[
-                            styles.progressBar,
-                            { width: `${occupancy}%`, backgroundColor: barColor },
-                          ]}
-                        />
+                        <View style={[styles.progressBar, { width: `${Math.min(pct, 100)}%`, backgroundColor: barColor }]} />
                       </View>
-
                       <View style={styles.zoneFooter}>
                         <ThemedText style={styles.zoneCapacityText}>
-                          Cap: {zone.capacity} occupants
+                          {zone.occupancy}/{zone.capacity} occupants
                         </ThemedText>
-                        <ThemedText style={styles.zonePercentageText}>{occupancy}% Full</ThemedText>
+                        <ThemedText style={styles.zonePercentageText}>{pct}% Full</ThemedText>
                       </View>
                     </View>
                   );
