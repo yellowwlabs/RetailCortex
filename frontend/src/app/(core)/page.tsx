@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { HomeHeaderUser } from '@/components/home-header-user';
 
 export default function LandingPage() {
+  const yellowLabsUrl = 'https://yellowlabs.space/';
+
   return (
     <main className="flex min-h-screen flex-col bg-[#0d0d0d] font-sans text-zinc-100 antialiased selection:bg-white/10 selection:text-white">
       {/* Header Navigation */}
@@ -572,17 +574,17 @@ export default function LandingPage() {
               </h4>
               <ul className="mt-4 space-y-2 text-zinc-500 text-xs">
                 <li>
-                  <a href="https://yellowlabs.co" className="hover:text-zinc-300">
+                  <a href={yellowLabsUrl} className="hover:text-zinc-300">
                     Yellow Labs
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-zinc-300">
+                  <a href={yellowLabsUrl} className="hover:text-zinc-300">
                     Careers
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-zinc-300">
+                  <a href={yellowLabsUrl} className="hover:text-zinc-300">
                     Contact Us
                   </a>
                 </li>
@@ -594,17 +596,17 @@ export default function LandingPage() {
               </h4>
               <ul className="mt-4 space-y-2 text-zinc-500 text-xs">
                 <li>
-                  <a href="#" className="hover:text-zinc-300">
+                  <a href={yellowLabsUrl} className="hover:text-zinc-300">
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-zinc-300">
+                  <a href={yellowLabsUrl} className="hover:text-zinc-300">
                     Terms of Use
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-zinc-300">
+                  <a href={yellowLabsUrl} className="hover:text-zinc-300">
                     Security Audit
                   </a>
                 </li>
